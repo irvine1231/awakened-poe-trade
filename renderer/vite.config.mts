@@ -27,9 +27,11 @@ export default defineConfig({
     }
   },
   server: {
+    port: 8001,
+    strictPort: true,
     proxy: {
-      '^/(config|uploads|proxy)': { target: 'http://127.0.0.1:8584' },
-      '/events': { ws: true, target: 'http://127.0.0.1:8584' }
+      '^/(config|uploads|proxy)': { target: 'http://127.0.0.1:8002' },
+      '/events': { ws: true, target: 'http://127.0.0.1:8002' }
     }
   }
 })
