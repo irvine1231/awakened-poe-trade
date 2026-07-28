@@ -735,7 +735,9 @@ function parseModifiers (section: string[], item: ParsedItem) {
   )
 
   if (!recognizedLine) {
-    return 'SECTION_SKIPPED'
+    // Items linked in chat lack advanced mod descriptions ({ ... } headers)
+    // and value ranges, leaving a plain block of stat lines.
+    return parseFlatModifiers(section, item)
   }
 
   if (isModInfoLine(recognizedLine)) {
@@ -756,6 +758,35 @@ function parseModifiers (section: string[], item: ParsedItem) {
     parseStatsFromMod(lines, item, { info: modInfo, stats: [] })
   }
 
+  return 'SECTION_PARSED'
+}
+
+function parseFlatModifiers (section: string[], item: ParsedItem): SectionParseResult {
+  const parsed: ParsedModifier[] = []
+  const statIterator = linesToStatStrings(section)
+  let stat = statIterator.next()
+  while (!stat.done) {
+    const parsedStat = tryParseTranslation(stat.value, ModifierType.Explicit, item.category)
+    if (parsedStat) {
+      parsed.push({ info: { type: ModifierType.Explicit, tags: [] }, stats: [parsedStat] })
+      stat = statIterator.next(true)
+    } else {
+      stat = statIterator.next(false)
+    }
+  }
+  const unknown = stat.value
+
+  // Only treat this as a modifier section when most of its lines translate to
+  // stats, so property sections (e.g. requirements) are not misinterpreted.
+  if (!parsed.length || parsed.length < unknown.length) {
+    return 'SECTION_SKIPPED'
+  }
+
+  item.newMods.push(...parsed)
+  item.unknownModifiers.push(...unknown.map(text => ({
+    text,
+    type: ModifierType.Explicit
+  })))
   return 'SECTION_PARSED'
 }
 
