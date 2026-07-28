@@ -14,7 +14,7 @@ Goal: bring upstream's changes into the fork while preserving the fork's customi
 ## Procedure
 
 1. **Preflight.** Run `git status`. If the working tree is dirty, ask the user whether to commit or stash first — do not rebase over uncommitted work. Note the current branch (normally `master`).
-2. **Fetch.** `git fetch upstream`.
+2. **Fetch code only — never tags.** `git fetch upstream --no-tags`. (The `upstream` remote is configured with `tagOpt=--no-tags`, so tags are skipped by default too.) The fork manages its own release tags; do **not** pull upstream's.
 3. **Preview.** Show what's incoming: `git log --oneline HEAD..upstream/master`. Summarize notable changes (especially anything touching `renderer/src/parser/**`, `main/src/**`, versioning, or build config).
 4. **Rebase.** `git rebase upstream/master` (the user asked for rebase). If it conflicts, resolve per the rules below, `git add` each resolved file, then `git rebase --continue`. Repeat until done.
    - If rebase becomes messy across many commits, offer `git merge upstream/master` as a simpler alternative (single conflict pass), but only switch with the user's ok.
@@ -49,6 +49,8 @@ These were fork fixes that upstream later adopted independently; prefer upstream
 
 - **Never stage or commit `.env`** — it holds a secret token and is gitignored. Verify it's not staged before finishing.
 - **Never push automatically.** Rebase rewrites history; a push would be `--force-with-lease` and is the user's call.
+- **Never sync or push upstream tags.** Fetch with `--no-tags`, and when pushing, push the **branch only** (`git push origin master`) — never `git push --tags`. The fork uses its own release tags (created by `electron-builder --publish`), which must not be polluted by upstream's.
+- **Push to `origin`, explicitly.** The `master` branch tracks `upstream/master`, so a bare `git push` could target the upstream repo. Always `git push origin master`.
 - **Leave `main/yarn.lock` and `renderer/yarn.lock` untracked** — this repo migrated from Yarn to npm; don't commit yarn lockfiles.
 - Keep the fork's diff from upstream **minimal** — only the items in the "Fork-unique" registry. If a conflict tempts a broader fork divergence, flag it to the user instead.
 
