@@ -2,8 +2,8 @@
   <div class="p-2 flex flex-col h-full items-center">
     <div class="flex flex-col items-center p-2 mb-4">
       <img class="w-12 h-12" src="/images/TransferOrb.png">
-      <p class="text-base">Awakened PoE Trade</p>
-      <p class="">{{ t('app.version', [version]) }}</p>
+      <p class="text-base">Awakened PoE Trade <span class="text-gray-500">· irvine</span></p>
+      <p class="">{{ t('app.version', [version + '-irvine']) }}</p>
       <div class="flex gap-2">
         <a class="border-b" href="https://github.com/SnosMe/awakened-poe-trade/releases" target="_blank">{{ t('app.release_notes') }}</a>
         <a class="border-b" href="https://github.com/SnosMe/awakened-poe-trade/issues" target="_blank">{{ t('app.report_bug') }}</a>
