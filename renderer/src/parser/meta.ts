@@ -1,5 +1,6 @@
 export enum ItemCategory {
   Map = 'Map',
+  Chart = 'Chart', // FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts
   CapturedBeast = 'Captured Beast',
   MetamorphSample = 'Metamorph Sample',
   Helmet = 'Helmet',
