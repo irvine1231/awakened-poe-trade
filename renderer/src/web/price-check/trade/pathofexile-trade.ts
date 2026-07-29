@@ -11,6 +11,7 @@ import { Cache } from './Cache'
 
 export const CATEGORY_TO_TRADE_ID = new Map([
   [ItemCategory.Map, 'map'],
+  [ItemCategory.Chart, 'chart'], // FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts
   [ItemCategory.AbyssJewel, 'jewel.abyss'],
   [ItemCategory.Amulet, 'accessory.amulet'],
   [ItemCategory.Belt, 'accessory.belt'],
@@ -302,6 +303,13 @@ export function createTradeRequest (filters: ItemFilters, stats: StatFilter[]) {
     query.type = nameToQuery(activeSearch.baseType, filters)
   }
 
+  // FORK PATCH: Chart area — when enabled, search the specific area variant, which
+  // the trade API keys by (type option + per-base discriminator).
+  // Remove when upstream supports Allflame Sea Charts.
+  if (filters.chartArea && !filters.chartArea.disabled) {
+    query.type = { option: filters.chartArea.value, discriminator: filters.chartArea.disc }
+  }
+
   if (filters.foil && !filters.foil.disabled) {
     propSet(query.filters, 'type_filters.filters.rarity.option', 'uniquefoil')
   } else if (filters.rarity) {
@@ -389,6 +397,11 @@ export function createTradeRequest (filters: ItemFilters, stats: StatFilter[]) {
     if (filters.areaLevel.max) {
       propSet(query.filters, 'map_filters.filters.area_level.max', filters.areaLevel.max)
     }
+  }
+
+  // FORK PATCH: Chart shape — remove when upstream supports Allflame Sea Charts.
+  if (filters.chartShape && !filters.chartShape.disabled) {
+    propSet(query.filters, 'map_filters.filters.chart_shape.option', filters.chartShape.value)
   }
 
   if (filters.heistWingsRevealed && !filters.heistWingsRevealed.disabled) {

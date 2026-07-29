@@ -114,6 +114,7 @@
   "item_category": {
     "prop": "Category: {0}",
     "map": "Map",
+    "chart": "Chart",
     "jewel_abyss": "Abyss Jewel",
     "accessory_amulet": "Amulet",
     "accessory_belt": "Belt",

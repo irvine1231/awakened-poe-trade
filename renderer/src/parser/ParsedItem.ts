@@ -34,6 +34,9 @@ export interface ParsedItem {
   weaponELEMENTAL?: number
   mapBlighted?: 'Blighted' | 'Blight-ravaged'
   mapCompletionReward?: string
+  // FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts
+  chartArea?: string
+  chartShape?: string
   map?: {
     tier: number | undefined
     itemQuantity?: number

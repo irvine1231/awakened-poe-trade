@@ -5,6 +5,7 @@ import { tradeTag } from '../trade/common'
 import { ModifierType } from '@/parser/modifiers'
 import { BaseType, ITEM_BY_REF, ITEM_BY_TRANSLATED } from '@/assets/data'
 import { CATEGORY_TO_TRADE_ID } from '../trade/pathofexile-trade'
+import { CHART_AREA_NAMES, CHART_SHAPE_NAMES, CHART_BASE_DISC } from '@/parser/chart' // FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts
 
 export const SPECIAL_SUPPORT_GEM = ['Empower Support', 'Enlighten Support', 'Enhance Support']
 
@@ -210,6 +211,27 @@ export function createFilters (
       filters.searchRelaxed = {
         category: item.category,
         disabled: disabled
+      }
+    }
+  }
+
+  // FORK PATCH: Chart — expose the chart's area (its own trade `type`) and shape
+  // as toggleable filters. Remove when upstream supports Allflame Sea Charts.
+  if (item.category === ItemCategory.Chart) {
+    const disc = CHART_BASE_DISC[item.info.refName]
+    if (item.chartArea && disc) {
+      filters.chartArea = {
+        value: item.chartArea,
+        name: CHART_AREA_NAMES[item.chartArea] ?? item.chartArea,
+        disc,
+        disabled: false
+      }
+    }
+    if (item.chartShape) {
+      filters.chartShape = {
+        value: item.chartShape,
+        name: CHART_SHAPE_NAMES[item.chartShape] ?? item.chartShape,
+        disabled: true
       }
     }
   }

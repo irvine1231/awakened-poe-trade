@@ -9,6 +9,11 @@
         :filter="{ disabled: false }" :text="t('item.map_foil_reward', [filters.mapCompletionReward.name])" />
       <filter-btn-numeric v-if="filters.areaLevel"
         :filter="filters.areaLevel" :name="t('item.area_level')" />
+      <!-- FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts -->
+      <filter-btn-logical v-if="filters.chartArea"
+        :filter="filters.chartArea" :text="'Area: ' + filters.chartArea.name" />
+      <filter-btn-logical v-if="filters.chartShape"
+        :filter="filters.chartShape" :text="'Chart Shape: ' + filters.chartShape.name" />
       <filter-btn-numeric v-if="filters.heistWingsRevealed"
         :filter="filters.heistWingsRevealed" :name="t('item.heist_wings_revealed')" />
       <filter-btn-numeric v-if="filters.sentinelCharge"

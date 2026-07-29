@@ -78,6 +78,9 @@ export interface ItemFilters {
     disabled: boolean
   }
   areaLevel?: FilterNumeric
+  // FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts
+  chartArea?: { value: string, name: string, disc: string, disabled: boolean }
+  chartShape?: { value: string, name: string, disabled: boolean }
   heistWingsRevealed?: FilterNumeric
   sentinelCharge?: FilterNumeric
   trade: {
