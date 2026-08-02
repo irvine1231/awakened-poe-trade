@@ -37,6 +37,9 @@ export interface ParsedItem {
   // FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts
   chartArea?: string
   chartShape?: string
+  // FORK PATCH: Ultimatum — remove when upstream supports Inscribed Ultimatum
+  ultimatumRequiredItem?: string
+  ultimatumRewardUnique?: string
   map?: {
     tier: number | undefined
     itemQuantity?: number

@@ -81,6 +81,9 @@ export interface ItemFilters {
   // FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts
   chartArea?: { value: string, name: string, disc: string, disabled: boolean }
   chartShape?: { value: string, name: string, disabled: boolean }
+  // FORK PATCH: Ultimatum — remove when upstream supports Inscribed Ultimatum
+  ultimatumRequiredItem?: { value: string, name: string, disabled: boolean }
+  ultimatumRewardUnique?: { value: string, name: string, disabled: boolean }
   heistWingsRevealed?: FilterNumeric
   sentinelCharge?: FilterNumeric
   trade: {
