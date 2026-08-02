@@ -69,6 +69,9 @@ export const CHART_BASE_DISC: Record<string, string> = {
 }
 
 const CHART_SHAPE_LINE = /^海圖形狀[：:]\s*(\S+)\s*$/m
+// Charts label their area level "區域等級" / "Area Level" (note: not the same
+// string as the `AREA_LEVEL` client string, which is "地區等級" for Heist/Logbook).
+const CHART_AREA_LEVEL_LINE = /^(?:Area Level|區域等級)\s*[：:]\s*(\d+)/m
 
 export function parseChart (item: ParsedItem): void {
   if (item.category !== ItemCategory.Chart) return
@@ -86,4 +89,7 @@ export function parseChart (item: ParsedItem): void {
     const id = CHART_SHAPE_TO_ID[shape[1]]
     if (id) item.chartShape = id
   }
+
+  const areaLevel = item.rawText.match(CHART_AREA_LEVEL_LINE)
+  if (areaLevel) item.areaLevel = Number(areaLevel[1])
 }

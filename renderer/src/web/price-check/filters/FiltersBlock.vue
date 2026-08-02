@@ -16,6 +16,11 @@
         :filter="filters.chartArea" :text="'Area: ' + filters.chartArea.name" />
       <filter-btn-logical v-if="filters.chartShape"
         :filter="filters.chartShape" :text="'Chart Shape: ' + filters.chartShape.name" />
+      <!-- FORK PATCH: Ultimatum — remove when upstream supports Inscribed Ultimatum -->
+      <filter-btn-logical v-if="filters.ultimatumRequiredItem"
+        :filter="filters.ultimatumRequiredItem" :text="'Requires Sacrifice: ' + filters.ultimatumRequiredItem.name" />
+      <filter-btn-logical v-if="filters.ultimatumRewardUnique"
+        :filter="filters.ultimatumRewardUnique" :text="'Reward: ' + filters.ultimatumRewardUnique.name" />
       <filter-btn-numeric v-if="filters.heistWingsRevealed"
         :filter="filters.heistWingsRevealed" :name="t('item.heist_wings_revealed')" />
       <filter-btn-numeric v-if="filters.sentinelCharge"

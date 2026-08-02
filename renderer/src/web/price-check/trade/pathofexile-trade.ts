@@ -168,6 +168,14 @@ interface TradeRequest {
           map_uberblighted?: FilterBoolean
           area_level?: FilterRange
           map_completion_reward?: { option?: 'any' | string }
+          chart_shape?: { option?: string } // FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts
+        }
+      }
+      // FORK PATCH: Ultimatum — remove when upstream supports Inscribed Ultimatum
+      ultimatum_filters?: {
+        filters: {
+          ultimatum_input?: { option?: string }
+          ultimatum_output?: { option?: string }
         }
       }
       heist_filters?: {
@@ -406,6 +414,15 @@ export function createTradeRequest (filters: ItemFilters, stats: StatFilter[]) {
   // FORK PATCH: Chart shape — remove when upstream supports Allflame Sea Charts.
   if (filters.chartShape && !filters.chartShape.disabled) {
     propSet(query.filters, 'map_filters.filters.chart_shape.option', filters.chartShape.value)
+  }
+
+  // FORK PATCH: Ultimatum — required (sacrificed) item + reward unique filters.
+  // Remove when upstream supports Inscribed Ultimatum.
+  if (filters.ultimatumRequiredItem && !filters.ultimatumRequiredItem.disabled) {
+    propSet(query.filters, 'ultimatum_filters.filters.ultimatum_input.option', filters.ultimatumRequiredItem.value)
+  }
+  if (filters.ultimatumRewardUnique && !filters.ultimatumRewardUnique.disabled) {
+    propSet(query.filters, 'ultimatum_filters.filters.ultimatum_output.option', filters.ultimatumRewardUnique.value)
   }
 
   if (filters.heistWingsRevealed && !filters.heistWingsRevealed.disabled) {

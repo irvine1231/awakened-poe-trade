@@ -61,6 +61,12 @@ export function createExactStatFilters (
     keepByType.push(ModifierType.Crafted)
   }
 
+  // FORK PATCH: Ultimatum — keep the monster modifiers (e.g. more Monster Life)
+  // as stat filters. Remove when upstream supports Inscribed Ultimatum.
+  if (item.info.refName === 'Inscribed Ultimatum') {
+    keepByType.push(ModifierType.Explicit)
+  }
+
   const ctx: FiltersCreationContext = {
     item,
     searchInRange: (item.category !== ItemCategory.Map)
@@ -133,6 +139,14 @@ export function createExactStatFilters (
     enableAllFilters(ctx.filters)
   } else if (item.category === ItemCategory.Idol) {
     enableGoodRolledFilters(ctx.filters, 0.66)
+  }
+
+  // FORK PATCH: Ultimatum — auto-enable the "more Monster Life" filter.
+  // Remove when upstream supports Inscribed Ultimatum.
+  if (item.info.refName === 'Inscribed Ultimatum') {
+    for (const filter of ctx.filters) {
+      if (filter.statRef === '#% more Monster Life') filter.disabled = false
+    }
   }
 
   return ctx.filters

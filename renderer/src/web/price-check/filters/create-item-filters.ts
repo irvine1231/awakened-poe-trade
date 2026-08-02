@@ -127,6 +127,22 @@ export function createFilters (
         disabled: false
       }
     }
+    // FORK PATCH: Ultimatum — expose the sacrificed ("Required") item and reward
+    // unique as filters. Remove when upstream supports Inscribed Ultimatum.
+    if (item.ultimatumRequiredItem) {
+      filters.ultimatumRequiredItem = {
+        value: item.ultimatumRequiredItem,
+        name: item.ultimatumRequiredItem,
+        disabled: false
+      }
+    }
+    if (item.ultimatumRewardUnique) {
+      filters.ultimatumRewardUnique = {
+        value: item.ultimatumRewardUnique,
+        name: item.ultimatumRewardUnique,
+        disabled: false
+      }
+    }
     return filters
   }
 
@@ -246,6 +262,9 @@ export function createFilters (
         name: CHART_SHAPE_NAMES[item.chartShape] ?? item.chartShape,
         disabled: true
       }
+    }
+    if (item.areaLevel) {
+      filters.areaLevel = { value: item.areaLevel, disabled: false }
     }
   }
 
