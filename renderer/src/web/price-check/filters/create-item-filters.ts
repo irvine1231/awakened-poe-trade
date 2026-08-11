@@ -195,12 +195,16 @@ export function createFilters (
       baseType: item.info.name,
       baseTypeTrade: t(opts, item.info)
     }
+    // FORK PATCH: Chart area level — upstream assumes item.mapArea is always set
+    // here, but parseChart leaves it undefined whenever the area section fails to
+    // parse, and the resulting TypeError blanks the whole overlay. Degrade to the
+    // base-type search instead. Remove once upstream guards this.
     filters.searchRelaxed = {
       category: item.category,
       disabled: false,
-      sub: {
-        baseType: item.mapArea!.name,
-        baseTypeTrade: item.mapArea!.tradeDisc!,
+      sub: item.mapArea && {
+        baseType: item.mapArea.name,
+        baseTypeTrade: item.mapArea.tradeDisc!,
         discriminatorTrade: item.info.tradeDisc!,
         disabled: false
       }

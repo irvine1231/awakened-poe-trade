@@ -1018,10 +1018,30 @@ function parseHeistBlueprint (section: string[], item: ParsedItem) {
   return 'SECTION_PARSED'
 }
 
+// FORK PATCH: Chart area level — remove when upstream parses this itself.
+// Charts label their area level "區域等級", which is NOT the AREA_LEVEL client
+// string ("地區等級", used by Heist/Logbook). Upstream's parseChart only checks
+// _$.AREA_LEVEL, so on cmn-Hant it bails with SECTION_SKIPPED, leaves
+// item.mapArea undefined, and createFilters then crashes on `item.mapArea!.name`
+// — which blanks the entire price-check overlay.
+const CHART_AREA_LEVEL_LINE = /^(?:Area Level|區域等級)\s*[：:]\s*(\d+)/
+
+function parseChartAreaLevel (section: string[], item: ParsedItem): boolean {
+  for (const line of section) {
+    const match = CHART_AREA_LEVEL_LINE.exec(line)
+    if (match) {
+      item.areaLevel = Number(match[1])
+      return true
+    }
+  }
+  return false
+}
+
 function parseChart (section: string[], item: ParsedItem) {
   if (item.category !== ItemCategory.Chart) return 'PARSER_SKIPPED'
 
-  if (!parseAreaLevelNested(section, item)) {
+  // FORK PATCH: Chart area level — `|| parseChartAreaLevel(...)` is the fork's.
+  if (!parseAreaLevelNested(section, item) && !parseChartAreaLevel(section, item)) {
     return 'SECTION_SKIPPED'
   }
 
