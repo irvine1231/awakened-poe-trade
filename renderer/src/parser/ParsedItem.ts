@@ -34,9 +34,6 @@ export interface ParsedItem {
   weaponELEMENTAL?: number
   mapBlighted?: 'Blighted' | 'Blight-ravaged'
   mapCompletionReward?: BaseType
-  // FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts
-  chartArea?: string
-  chartShape?: string
   // FORK PATCH: Ultimatum — remove when upstream supports Inscribed Ultimatum
   ultimatumRequiredItem?: string
   ultimatumRewardUnique?: string

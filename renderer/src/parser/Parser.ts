@@ -12,7 +12,6 @@ import { linesToStatStrings, tryParseTranslation, getRollOrMinmaxAvg } from './s
 import { ItemCategory, ACCESSORY } from './meta'
 import { IncursionRoom, ParsedItem, ItemInfluence, ItemRarity } from './ParsedItem'
 import { magicBasetype } from './magic-name'
-import { parseChart } from './chart' // FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts
 import { parseUltimatum } from './ultimatum' // FORK PATCH: Ultimatum — remove when upstream supports Inscribed Ultimatum
 import { isModInfoLine, groupLinesByMod, parseModInfoLine, parseModType, ModifierInfo, ParsedModifier, ENCHANT_LINE, SCOURGE_LINE, IMPLICIT_LINE } from './advanced-mod-desc'
 import { calcPropPercentile, QUALITY_STATS } from './calc-q20'
@@ -42,7 +41,6 @@ const parsers: Array<ParserFn | { virtual: VirtualParserFn }> = [
   { virtual: normalizeName },
   parseVaalGemName,
   { virtual: findInDatabase },
-  { virtual: parseChart }, // FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts
   // -----------
   parseItemLevel,
   parseTalismanTier,

@@ -11,11 +11,6 @@
         :filter="{ disabled: false }" :text="filters.scryingMapArea" />
       <filter-btn-numeric v-if="filters.areaLevel"
         :filter="filters.areaLevel" :name="t('item.area_level')" />
-      <!-- FORK PATCH: Chart — remove when upstream supports Allflame Sea Charts -->
-      <filter-btn-logical v-if="filters.chartArea"
-        :filter="filters.chartArea" :text="'Area: ' + filters.chartArea.name" />
-      <filter-btn-logical v-if="filters.chartShape"
-        :filter="filters.chartShape" :text="'Chart Shape: ' + filters.chartShape.name" />
       <!-- FORK PATCH: Ultimatum — remove when upstream supports Inscribed Ultimatum -->
       <filter-btn-logical v-if="filters.ultimatumRequiredItem"
         :filter="filters.ultimatumRequiredItem" :text="'Requires Sacrifice: ' + filters.ultimatumRequiredItem.name" />
