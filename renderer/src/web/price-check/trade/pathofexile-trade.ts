@@ -50,7 +50,8 @@ export const CATEGORY_TO_TRADE_ID = new Map([
   [ItemCategory.Tincture, 'tincture'],
   [ItemCategory.Charm, 'azmeri.charm'],
   [ItemCategory.Idol, 'idol'],
-  [ItemCategory.Graft, 'graft']
+  [ItemCategory.Graft, 'graft'],
+  [ItemCategory.Chart, 'chart']
 ])
 
 const TOTAL_MODS_TEXT = {
@@ -167,6 +168,7 @@ interface TradeRequest {
           map_uberblighted?: FilterBoolean
           area_level?: FilterRange
           map_completion_reward?: { option?: 'any' | string }
+          chart_sulphur?: FilterRange
         }
       }
       // FORK PATCH: Ultimatum — remove when upstream supports Inscribed Ultimatum
@@ -286,7 +288,10 @@ export function createTradeRequest (filters: ItemFilters, stats: StatFilter[]) {
     propSet(query.filters, 'trade_filters.filters.price.option', filters.trade.currency)
   }
 
-  if (filters.trade.collapseListings === 'api' && (filters.trade.offline || !filters.trade.merchantOnly)) {
+  if (
+    filters.trade.collapseListings === 'api' &&
+    (filters.trade.offline || !filters.trade.merchantOnly || filters.trade.collapseMerchant)
+  ) {
     propSet(query.filters, 'trade_filters.filters.collapse.option', String(true))
   }
 
@@ -294,20 +299,23 @@ export function createTradeRequest (filters: ItemFilters, stats: StatFilter[]) {
     propSet(query.filters, 'trade_filters.filters.indexed.option', filters.trade.listed)
   }
 
-  const activeSearch = (filters.searchRelaxed && !filters.searchRelaxed.disabled)
+  let activeSearch = (filters.searchRelaxed && !filters.searchRelaxed.disabled)
     ? filters.searchRelaxed
     : filters.searchExact
+  if (activeSearch.sub && !activeSearch.sub.disabled) {
+    activeSearch = activeSearch.sub
+  }
 
   if (activeSearch.nameTrade) {
-    query.name = nameToQuery(activeSearch.nameTrade, filters)
+    query.name = nameToQuery(activeSearch.nameTrade, activeSearch.discriminatorTrade)
   } else if (activeSearch.name) {
-    query.name = nameToQuery(activeSearch.name, filters)
+    query.name = nameToQuery(activeSearch.name, activeSearch.discriminatorTrade)
   }
 
   if (activeSearch.baseTypeTrade) {
-    query.type = nameToQuery(activeSearch.baseTypeTrade, filters)
+    query.type = nameToQuery(activeSearch.baseTypeTrade, activeSearch.discriminatorTrade)
   } else if (activeSearch.baseType) {
-    query.type = nameToQuery(activeSearch.baseType, filters)
+    query.type = nameToQuery(activeSearch.baseType, activeSearch.discriminatorTrade)
   }
 
   if (filters.foil && !filters.foil.disabled) {
@@ -553,6 +561,10 @@ export function createTradeRequest (filters: ItemFilters, stats: StatFilter[]) {
       case 'item.heist_target_priceless':
         propSet(query.filters, 'heist_filters.filters.heist_objective_value.option', 'priceless')
         break
+      case 'item.chart_sulphur':
+        propSet(query.filters, 'map_filters.filters.chart_sulphur.min', typeof input.min === 'number' ? input.min : undefined)
+        propSet(query.filters, 'map_filters.filters.chart_sulphur.max', typeof input.max === 'number' ? input.max : undefined)
+        break
     }
   }
 
@@ -734,12 +746,12 @@ function tradeIdToQuery (id: string, stat: Pick<StatFilter, 'roll' | 'option' | 
   }
 }
 
-function nameToQuery (name: string, filters: ItemFilters) {
-  if (!filters.discriminator) {
+function nameToQuery (name: string, discriminator?: string) {
+  if (!discriminator) {
     return name
   } else {
     return {
-      discriminator: filters.discriminator.trade,
+      discriminator: discriminator,
       option: name
     }
   }
