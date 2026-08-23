@@ -679,7 +679,10 @@ function parseWeapon (section: string[], item: ParsedItem) {
 }
 
 function parseAccessory (section: string[], item: ParsedItem) {
-  if (!item.category || !ACCESSORY.has(item.category)) return 'PARSER_SKIPPED'
+  // Quiver has no properties section of its own, so "Memory Strands"
+  // arrives as a standalone section, same as on accessories.
+  if (!item.category ||
+      (!ACCESSORY.has(item.category) && item.category !== ItemCategory.Quiver)) return 'PARSER_SKIPPED'
 
   if (parseMemoryStrandsNested(section, item)) {
     return 'SECTION_PARSED'

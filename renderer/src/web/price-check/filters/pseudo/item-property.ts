@@ -29,13 +29,15 @@ export function filterBasePercentile (ctx: FiltersCreationContext) {
 
 export function filterMemoryStrands (ctx: FiltersCreationContext, hidden?: string) {
   if (ctx.item.memoryStrands != null) {
+    const notable = (ctx.item.memoryStrands >= 60)
+
     ctx.filters.push(propToFilter({
       ref: 'Memory Strands: #',
       tradeId: 'item.memory_strands',
       roll: { min: 0, max: 100, value: ctx.item.memoryStrands },
       sources: [],
-      disabled: (ctx.item.memoryStrands < 60 || hidden !== undefined),
-      hidden: hidden
+      disabled: !notable,
+      hidden: notable ? undefined : hidden
     }, ctx))
   }
 }
