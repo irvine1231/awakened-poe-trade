@@ -1,5 +1,6 @@
 import type { ModifierType, StatCalculated } from './modifiers'
 import type { ParsedModifier } from './advanced-mod-desc'
+import type { ParsedStat } from './stat-translations'
 import type { BaseType } from '@/assets/data'
 import { ItemCategory } from './meta'
 
@@ -51,6 +52,7 @@ export interface ParsedItem {
   ultimatumRewardUnique?: string
   heistBlueprint?: {
     wingsRevealed?: number
+    wingsTotal?: number
     target?: 'Enchants' | 'Trinkets' | 'Gems' | 'Replicas'
   }
   heistContract?: {
@@ -62,7 +64,10 @@ export interface ParsedItem {
   chartSulphur?: number
 
   gemLevel?: number
+  vaalGem?: BaseType
   imbuedGem?: boolean
+  mercenaryBuild?: BaseType
+  mercenarySkills?: ParsedStat[][]
   talismanTier?: number
   memoryStrands?: number
   quality?: number
