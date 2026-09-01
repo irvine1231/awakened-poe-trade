@@ -71,7 +71,6 @@ if (-not $SkipRenderer) {
   Push-Location (Join-Path $root 'renderer')
   try {
     if (-not (Test-Path 'node_modules')) { Run yarn install }
-    Run yarn make-index-files
     Run yarn build
   } finally { Pop-Location }
 }
