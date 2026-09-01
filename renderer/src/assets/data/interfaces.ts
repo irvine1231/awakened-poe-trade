@@ -22,6 +22,7 @@ export interface Stat {
   fromAreaMods?: 'yes' | 'ubermap_exclusive' | 'heist_exclusive'
   anointments?: Array<{ roll: number, oils: string }>
   mercenary?: { icon?: string, supports?: string[], tier?: number, canonical?: string, syntheticFamily?: true }
+  jewelleryQuality?: { catalyst: string }
   trade: {
     inverted?: true
     option?: true
@@ -97,6 +98,7 @@ export interface BaseType {
   area?: {
     screenshot?: string
     special?: true
+    blighted?: true
   }
   gem?: {
     vaal?: true
@@ -245,7 +247,7 @@ export interface TranslationDict {
   FOULBORN_MODIFIER: string
   VESTIGIAL_NAME: RegExp
   VESTIGIAL_IMPLICIT: string
-  SCRYING_MAP_AREA: string
+  MAP_AREA: string
   CHART_SULPHUR: string
   MERCENARY_LEVEL: string
   MERCENARY_BUILD: string

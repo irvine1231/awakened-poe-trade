@@ -395,6 +395,9 @@ export function createTradeRequest (filters: ItemFilters, stats: FilterOrGroup[]
       propSet(query.filters, 'map_filters.filters.map_blighted.option', String(true))
     } else if (filters.mapBlighted.value === 'Blight-ravaged') {
       propSet(query.filters, 'map_filters.filters.map_uberblighted.option', String(true))
+    } else if (filters.mapBlighted.value === false) {
+      propSet(query.filters, 'map_filters.filters.map_blighted.option', String(false))
+      propSet(query.filters, 'map_filters.filters.map_uberblighted.option', String(false))
     }
   }
 
@@ -619,6 +622,13 @@ export function createTradeRequest (filters: ItemFilters, stats: FilterOrGroup[]
       query.stats.push({
         type: 'not',
         disabled: group.meta.disabled,
+        filters: group.stats.flatMap(stat => everyTradeIdToQuery(stat))
+      })
+    } else if (group.group === 'one') {
+      query.stats.push({
+        type: 'count',
+        value: { min: 1 },
+        disabled: group.meta.disabled || group.stats.every(stat => stat.disabled),
         filters: group.stats.flatMap(stat => everyTradeIdToQuery(stat))
       })
     } else if (group.group === 'mercenary') {

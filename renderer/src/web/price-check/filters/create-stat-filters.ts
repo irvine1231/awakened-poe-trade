@@ -1,14 +1,15 @@
 import { ParsedItem, ItemRarity, ItemCategory } from '@/parser'
 import { ModifierType, StatCalculated, statSourcesTotal, translateStatWithRoll } from '@/parser/modifiers'
 import { percentRoll, percentRollDelta, roundRoll } from './util'
-import { FilterTag, ItemHasEmptyModifier, StatFilter } from './interfaces'
+import { FilterTag, ItemHasEmptyModifier, StatFilter, FilterGroup, FilterOrGroup } from './interfaces'
 import { filterPseudo } from './pseudo'
 import { applyRules as applyAtzoatlRules } from './pseudo/atzoatl-rules'
 import { applyRules as applyMirroredTabletRules } from './pseudo/reflection-rules'
-import { filterItemProp, filterBasePercentile, filterMemoryStrands } from './pseudo/item-property'
+import { filterEquipmentProps, filterBasePercentile, filterMemoryStrands } from './pseudo/item-property'
 import { mapProps, valdoBadMods, chartProps } from './pseudo/maps'
 import { applyFlaskHybridMod } from './pseudo/flasks'
 import { applyHeistRules } from './pseudo/heist'
+import { filterTimelessJewelKeystones } from './pseudo/timeless-jewel'
 import { decodeOils, applyAnointmentRules } from './pseudo/anointments'
 import { StatBetter, CLIENT_STRINGS } from '@/assets/data'
 
@@ -16,6 +17,7 @@ export interface FiltersCreationContext {
   readonly item: ParsedItem
   readonly searchInRange: number
   filters: StatFilter[]
+  groups: FilterGroup[]
   statsByType: StatCalculated[]
 }
 
@@ -25,7 +27,7 @@ export function createExactStatFilters (
   opts: { searchStatRange: number, mode?: 'props' | 'bulk' }
 ): StatFilter[] {
   if (
-    item.mapBlighted ||
+    item.info.area?.blighted ||
     item.category === ItemCategory.Invitation
   ) return []
   if (
@@ -75,6 +77,7 @@ export function createExactStatFilters (
       ? Math.min(2, opts.searchStatRange)
       : opts.searchStatRange,
     filters: [],
+    groups: [],
     statsByType: statsByType.filter(calc => keepByType.includes(calc.type))
   }
 
@@ -96,16 +99,10 @@ export function createExactStatFilters (
     applyMirroredTabletRules(ctx.filters)
     return ctx.filters
   }
-  if (item.category === ItemCategory.Map || item.category === ItemCategory.Chart) {
-    for (const filter of ctx.filters) {
-      if (filter.tag !== FilterTag.Property && filter.tag !== FilterTag.Pseudo) {
-        filter.disabled = false
-      }
-    }
-    return ctx.filters
-  }
 
   for (const filter of ctx.filters) {
+    if (filter.not) continue
+
     filter.hidden = undefined
 
     if (filter.tag === FilterTag.Explicit) {
@@ -113,7 +110,7 @@ export function createExactStatFilters (
         source.modifier.info.tier != null &&
         source.modifier.info.tier <= 2
       )
-    } else if (filter.tag !== FilterTag.Property) {
+    } else if (filter.tag !== FilterTag.Property && filter.tag !== FilterTag.Pseudo) {
       filter.disabled = false
     }
 
@@ -125,7 +122,7 @@ export function createExactStatFilters (
   }
 
   if (item.category === ItemCategory.ClusterJewel) {
-    applyClusterJewelRules(ctx.filters)
+    applyClusterJewelRules(ctx.filters, true)
   } if (
     item.category === ItemCategory.HeistContract ||
     item.category === ItemCategory.HeistBlueprint
@@ -160,10 +157,11 @@ export function initUiModFilters (
   opts: {
     searchStatRange: number
   }
-): StatFilter[] {
+): FilterOrGroup[] {
   const ctx: FiltersCreationContext = {
     item,
     filters: [],
+    groups: [],
     searchInRange: (item.rarity === ItemRarity.Normal) ? 100 : opts.searchStatRange,
     statsByType: item.statsByType.map(calc => {
       if (calc.type === ModifierType.Fractured && calc.stat.trade.ids[ModifierType.Explicit]) {
@@ -174,13 +172,16 @@ export function initUiModFilters (
     })
   }
 
+  filterEquipmentProps(ctx)
+  if (item.info.refName === "Emperor's Vigilance") {
+    filterBasePercentile(ctx)
+  }
+  filterMemoryStrands(ctx, 'hide_memory_strands')
   if (item.info.refName !== 'Split Personality') {
-    filterItemProp(ctx)
     filterPseudo(ctx)
-    if (item.info.refName === "Emperor's Vigilance") {
-      filterBasePercentile(ctx)
-    }
-    filterMemoryStrands(ctx, 'hide_memory_strands')
+  }
+  if (item.info.unique && item.info.unique.base === 'Timeless Jewel') {
+    filterTimelessJewelKeystones(ctx)
   }
 
   if (!item.isCorrupted && !item.isMirrored) {
@@ -202,7 +203,7 @@ export function initUiModFilters (
 
   finalFilterTweaks(ctx)
 
-  return ctx.filters
+  return [...ctx.filters, ...ctx.groups]
 }
 
 export function calculatedStatToFilter (
@@ -266,12 +267,20 @@ export function calculatedStatToFilter (
       filter.tag = FilterTag.Synthesised
     }
   } else if (type === ModifierType.Explicit) {
-    if (item.info.unique?.fixedStats) {
-      const fixedStats = item.info.unique.fixedStats
-      if (!fixedStats.includes(filter.statRef)) {
+    if (item.info.unique) {
+      if (item.info.unique.fixedStats) {
+        const fixedStats = item.info.unique.fixedStats
+        if (!fixedStats.includes(filter.statRef)) {
+          filter.tag = FilterTag.Variant
+        }
+      } else if (sources.some(s =>
+        s.modifier.info.generation === 'prefix' ||
+        s.modifier.info.generation === 'suffix'
+      )) {
         filter.tag = FilterTag.Variant
       }
-    } else if (sources.some(s => s.modifier.info.generation === 'foulborn')) {
+    }
+    if (sources.some(s => s.modifier.info.generation === 'foulborn')) {
       filter.tag = FilterTag.Foulborn
     } else if (sources.some(s => CLIENT_STRINGS.SHAPER_MODS.includes(s.modifier.info.name!))) {
       filter.tag = FilterTag.Shaper
@@ -332,7 +341,7 @@ export function calculatedStatToFilter (
 
     const dp =
     calc.stat.dp ||
-    calc.sources.some(s => s.stat.stat.ref === calc.stat.ref && s.stat.roll!.dp)
+    calc.sources.some(s => s.stat.stat.ref === calc.stat.ref && s.stat.roll?.dp)
 
     const filterBounds = {
       min: percentRoll(roll.min, -0, Math.floor, dp),
@@ -450,7 +459,7 @@ function finalFilterTweaks (ctx: FiltersCreationContext) {
   const { item } = ctx
 
   if (item.category === ItemCategory.ClusterJewel && item.rarity !== ItemRarity.Unique) {
-    applyClusterJewelRules(ctx.filters)
+    applyClusterJewelRules(ctx.filters, false)
   } else if (item.category === ItemCategory.Flask) {
     applyFlaskRules(ctx.filters)
     applyFlaskHybridMod(ctx)
@@ -483,6 +492,8 @@ function finalFilterTweaks (ctx: FiltersCreationContext) {
         // hide only if fractured mod has corresponding explicit variant
         filter.hidden = 'filters.hide_for_crafting'
       }
+    } else if (filter.sources[0]?.stat.stat.jewelleryQuality) {
+      filter.hidden = 'hide_jewellery_quality'
     } else if (
       filter.tag === FilterTag.Foulborn ||
       filter.tag === FilterTag.Vestigial ||
@@ -500,7 +511,7 @@ function finalFilterTweaks (ctx: FiltersCreationContext) {
   }
 }
 
-function applyClusterJewelRules (filters: StatFilter[]) {
+function applyClusterJewelRules (filters: StatFilter[], exact: boolean) {
   for (const filter of filters) {
     if (filter.statRef === '# Added Passive Skills are Jewel Sockets') {
       filter.hidden = 'filters.hide_const_roll'
@@ -514,8 +525,8 @@ function applyClusterJewelRules (filters: StatFilter[]) {
       // 4 is [_, 5]
       if (filter.roll!.value === 4) {
         filter.roll!.max = 5
-      // 5 is [5, 5]
-      } else if (filter.roll!.value === 5) {
+      // 5 is [5, 5] (and [_, 5] for Rare jewel)
+      } else if (filter.roll!.value === 5 && exact) {
         filter.roll!.min = filter.roll!.default.min
       // 3, 6, 10, 11, 12 are [n, _]
       } else if (
@@ -528,7 +539,7 @@ function applyClusterJewelRules (filters: StatFilter[]) {
         filter.roll!.min = filter.roll!.default.min
         filter.roll!.max = undefined
       }
-      // else 2, 8, 9 are [_ , n]
+      // else 2, 5(Rare), 8, 9 are [_ , n]
     }
   }
 }

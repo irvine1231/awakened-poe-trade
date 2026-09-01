@@ -18,8 +18,6 @@
         :filter="filters.ultimatumRewardUnique" :text="'Reward: ' + filters.ultimatumRewardUnique.name" />
       <filter-btn-numeric v-if="filters.sentinelCharge"
         :filter="filters.sentinelCharge" :name="t('item.sentinel_charge')" />
-      <filter-btn-logical v-if="filters.mapBlighted" readonly
-        :filter="{ disabled: false }" :text="filters.mapBlighted.value" />
       <filter-btn-numeric v-if="filters.itemLevel"
         :filter="filters.itemLevel" :name="t('item.item_level')" />
       <filter-btn-numeric v-if="filters.stackSize"
