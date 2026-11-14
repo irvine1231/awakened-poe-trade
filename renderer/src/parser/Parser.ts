@@ -7,7 +7,7 @@ import {
   StatBetter,
   BaseType
 } from '@/assets/data'
-import { ModifierType, sumStatsByModType } from './modifiers'
+import { ModifierType, ModifierMechanic, sumStatsByModType } from './modifiers'
 import { linesToStatStrings, tryParseTranslation, getRollOrMinmaxAvg, ParsedStat } from './stat-translations'
 import { ItemCategory, JEWELLERY } from './meta'
 import { IncursionRoom, ParsedItem, ItemInfluence, ItemRarity } from './ParsedItem'
@@ -84,6 +84,7 @@ const parsers: Array<ParserFn | { virtual: VirtualParserFn }> = [
   parseModifiers, // explicit
   parseUltimatum, // FORK PATCH: Ultimatum — sacrifice section
   parseUltimatum, // FORK PATCH: Ultimatum — modifier section
+  { virtual: augmentModifiers },
   { virtual: transformToLegacyModifiers },
   { virtual: parseFractured },
   { virtual: pickCorrectVariant },
@@ -117,6 +118,9 @@ export function parseClipboard (clipboard: string): Result<ParsedItem, string> {
       }
 
       for (const section of sections) {
+        // workaround upstream bug
+        parseEldritchItem(section)
+
         const result = parser(section, parsed.value)
         if (result === 'SECTION_PARSED') {
           sections = sections.filter(s => s !== section)
@@ -217,6 +221,18 @@ function findInDatabase (item: ParserState) {
   }
 }
 
+export function makeIdentifiedUnique (uniqueInfo: BaseType, unidentified: ParsedItem): ParsedItem {
+  const newItem: ParsedItem = {
+    ...unidentified,
+    info: uniqueInfo,
+    uniqueBase: unidentified.info
+  }
+
+  calcDisenchantDust(newItem)
+
+  return Object.freeze(newItem)
+}
+
 function parseMapTier (item: ParserState) {
   const execResult = _$.MAP_TIER.exec(item.baseType || item.name)
   if (!execResult) return
@@ -289,9 +305,17 @@ function parseFractured (item: ParserState) {
 }
 
 function pickCorrectVariant (item: ParserState) {
-  if (!item.info.disc) return
+  item.info = _pickCorrectVariant(item.infoVariants, item) ?? item.infoVariants[0]
+  if (item.info.unique) {
+    const baseVariants = ITEM_BY_REF('ITEM', item.info.unique.base)!
+    item.uniqueBase = _pickCorrectVariant(baseVariants, item) ?? baseVariants[0]
+  }
+}
 
-  for (const variant of item.infoVariants) {
+function _pickCorrectVariant (variants: BaseType[], item: ParsedItem): BaseType | undefined {
+  if (variants.length <= 1) return variants[0]
+
+  for (const variant of variants) {
     const cond = variant.disc!
 
     if (cond.propAR && !item.armourAR) continue
@@ -317,7 +341,7 @@ function pickCorrectVariant (item: ParserState) {
 
     if (cond.sectionText && !item.rawText.includes(cond.sectionText)) continue
 
-    item.info = variant
+    return variant
   }
 
   // it may happen that we don't find correct variant
@@ -845,11 +869,9 @@ function parseFlatModifiers (section: string[], item: ParsedItem): SectionParseR
 }
 
 function parseMirrored (section: string[], item: ParsedItem) {
-  if (section.length === 1) {
-    if (section[0] === _$.MIRRORED) {
-      item.isMirrored = true
-      return 'SECTION_PARSED'
-    }
+  if (section[0] === _$.MIRRORED) {
+    item.isMirrored = true
+    return 'SECTION_PARSED'
   }
   return 'SECTION_SKIPPED'
 }
@@ -920,6 +942,19 @@ function parseScryingOrb (section: string[], item: ParsedItem) {
     }
   }
   return 'SECTION_SKIPPED'
+}
+
+function parseEldritchItem (section: string[]): void {
+  // these don't have a dedicated section and are appended to last-ish one,
+  // it can be Explicit Mods section, Corrupted, or Mirrored line.
+  while (section.length) {
+    const lastLine = section[section.length - 1]
+    if (lastLine === _$.ITEM_EATER || lastLine === _$.ITEM_EXARCH) {
+      section.pop()
+    } else {
+      break
+    }
+  }
 }
 
 function parseSynthesised (section: string[], item: ParserState) {
@@ -1255,6 +1290,26 @@ function parseStatsFromMod (lines: string[], item: ParsedItem, modifier: ParsedM
   })))
 }
 
+function augmentModifiers (item: ParsedItem) {
+  for (const mod of item.newMods) {
+    if (item.isSynthesised && mod.info.type === ModifierType.Implicit) {
+      mod.info.mechanic ??= ModifierMechanic.Synthesised
+    }
+
+    for (const stat of mod.stats) {
+      if (stat.roll?.generation !== 'legacy' || stat.roll.unscalable) continue
+
+      if (item.rarity === ItemRarity.Unique && item.isCorrupted) {
+        stat.roll.generation = 'volatile'
+      } else if (item.rarity === ItemRarity.Rare && item.isMirrored &&
+        (item.category === ItemCategory.Ring || item.category === ItemCategory.Amulet)
+      ) {
+        stat.roll.generation = 'reflecting'
+      }
+    }
+  }
+}
+
 /**
  * @deprecated
  */
@@ -1263,9 +1318,7 @@ function transformToLegacyModifiers (item: ParsedItem) {
 }
 
 function calcBasePercentile (item: ParsedItem) {
-  const info = item.info.unique
-    ? ITEM_BY_REF('ITEM', item.info.unique.base)![0].armour
-    : item.info.armour
+  const info = item.uniqueBase?.armour ?? item.info.armour
   if (!info) return
 
   // Base percentile is the same for all defences.
@@ -1282,7 +1335,7 @@ function calcBasePercentile (item: ParsedItem) {
   }
 }
 
-function calcDisenchantDust (item: ParserState) {
+function calcDisenchantDust (item: ParsedItem) {
   if (!item.info.unique?.disenchantValue) return
 
   let increaseByFactors = 0
@@ -1298,7 +1351,7 @@ function calcDisenchantDust (item: ParserState) {
   // +50% per Corruption Implicit
   if (item.isCorrupted) {
     for (const mod of item.newMods) {
-      if (mod.info.generation === 'corrupted') {
+      if (mod.info.mechanic === ModifierMechanic.Corruption) {
         increaseByFactors += 50
       }
     }
