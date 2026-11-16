@@ -111,7 +111,7 @@ export function createFilters (
     }
     if (item.info.refName === 'Chronicle of Atzoatl') {
       filters.areaLevel = {
-        value: floorToBracket(item.areaLevel!, [1, 68, 73, 75, 78, 80]),
+        value: item.areaLevel!, // FORK PATCH: Chronicle area level — exact, upstream floors to a bracket
         disabled: false
       }
     } else if (item.info.refName === 'Mirrored Tablet') {
