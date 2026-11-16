@@ -51,6 +51,7 @@ export enum ItemCategory {
   Idol = 'Idol',
   Graft = 'Graft',
   Chart = 'Chart',
+  Viscera = 'Viscera', // FORK PATCH: Viscera — remove when upstream supports Viscera
   MercenaryWarrant = 'Mercenary Warrant'
 }
 
@@ -120,5 +121,9 @@ export const CONSUMABLE_CRAFTABLE_ITEM = new Set([
   ItemCategory.Invitation,
   ItemCategory.MemoryLine,
   ItemCategory.ExpeditionLogbook,
-  ItemCategory.Chart
+  ItemCategory.Chart,
+  ItemCategory.Viscera // FORK PATCH: Viscera
 ])
+
+// FORK PATCH: Viscera — remove when upstream supports Viscera
+export type VisceraTier = 'lesser' | 'normal' | 'greater'

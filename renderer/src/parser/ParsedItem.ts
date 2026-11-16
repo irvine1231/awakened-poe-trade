@@ -2,7 +2,7 @@ import type { ModifierType, StatCalculated } from './modifiers'
 import type { ParsedModifier } from './advanced-mod-desc'
 import type { ParsedStat } from './stat-translations'
 import type { BaseType } from '@/assets/data'
-import { ItemCategory } from './meta'
+import { ItemCategory, type VisceraTier } from './meta' // FORK PATCH: Viscera
 
 export enum ItemRarity {
   Normal = 'Normal',
@@ -46,6 +46,7 @@ export interface ParsedItem {
   mapMoreScarabs?: number
   mapMoreCurrency?: number
   mapMoreDivCards?: number
+  visceraTier?: VisceraTier // FORK PATCH: Viscera
   // FORK PATCH: Ultimatum — remove when upstream supports Inscribed Ultimatum
   ultimatumRequiredItem?: string
   ultimatumRewardUnique?: string

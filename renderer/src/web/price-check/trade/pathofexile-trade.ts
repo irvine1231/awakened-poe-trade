@@ -52,7 +52,8 @@ export const CATEGORY_TO_TRADE_ID = new Map([
   [ItemCategory.Charm, 'azmeri.charm'],
   [ItemCategory.Idol, 'idol'],
   [ItemCategory.Graft, 'graft'],
-  [ItemCategory.Chart, 'chart']
+  [ItemCategory.Chart, 'chart'],
+  [ItemCategory.Viscera, 'viscera'] // FORK PATCH: Viscera
 ])
 
 const TOTAL_MODS_TEXT = {
@@ -90,6 +91,7 @@ interface TradeRequest {
     status: { option: 'online' | 'securable' | 'available' | 'any' }
     name?: string | { discriminator: string, option: string }
     type?: string | { discriminator: string, option: string }
+    term?: string // FORK PATCH: Viscera
     stats: Array<{
       type: 'and' | 'if' | 'count' | 'not' | 'mercenary'
       value?: FilterRange
@@ -315,7 +317,9 @@ export function createTradeRequest (filters: ItemFilters, stats: FilterOrGroup[]
     query.name = nameToQuery(activeSearch.name, activeSearch.discriminatorTrade)
   }
 
-  if (activeSearch.baseTypeTrade) {
+  if (activeSearch.termTrade) { // FORK PATCH: Viscera
+    query.term = activeSearch.termTrade
+  } else if (activeSearch.baseTypeTrade) {
     query.type = nameToQuery(activeSearch.baseTypeTrade, activeSearch.discriminatorTrade)
   } else if (activeSearch.baseType) {
     query.type = nameToQuery(activeSearch.baseType, activeSearch.discriminatorTrade)

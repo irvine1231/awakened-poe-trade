@@ -62,6 +62,8 @@ export default {
   METAMORPH_HEART: /^Сердце: .*$/,
   METAMORPH_LIVER: /^Печень: .*$/,
   CANNOT_USE_ITEM: 'Вы не можете использовать этот предмет, его параметры не будут учтены',
+  VISCERA_LESSER: 'Lesser ', // FORK PATCH: Viscera
+  VISCERA_GREATER: 'Greater ', // FORK PATCH: Viscera
   QUALITY_ANOMALOUS: /^Аномальный: (.*)$/,
   QUALITY_DIVERGENT: /^Искривлённый: (.*)$/,
   QUALITY_PHANTASMAL: /^Фантомный: (.*)$/,

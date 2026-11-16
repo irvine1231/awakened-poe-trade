@@ -4,7 +4,7 @@ import { MAGIC_ONLY_OR_UNIQUE_ITEM, CONSUMABLE_CRAFTABLE_ITEM, JEWELLERY } from 
 import { getPropQuality } from '@/parser/calc-q20'
 import { tradeTag } from '../trade/common'
 import { ModifierType } from '@/parser/modifiers'
-import { BaseType, ITEM_BY_REF } from '@/assets/data'
+import { BaseType, ITEM_BY_REF, CLIENT_STRINGS as _$ } from '@/assets/data' // FORK PATCH: Viscera (_$)
 import { CATEGORY_TO_TRADE_ID } from '../trade/pathofexile-trade'
 import { PERMANENT_SC } from '../../background/Leagues'
 
@@ -232,6 +232,14 @@ export function createFilters (
         disabled: false
       }
     }
+  } else if (item.category === ItemCategory.Viscera) {
+    // FORK PATCH: Viscera — the English site searches a tier via `term` (type matches all tiers); other sites fall back to type
+    filters.searchExact = opts.useEn
+      ? {
+          baseType: visceraTierPrefix(item) + item.info.name,
+          termTrade: visceraTierPrefix(item, true) + item.info.refName
+        }
+      : { baseType: item.info.name, baseTypeTrade: item.info.name }
   } else if (item.rarity === ItemRarity.Unique && item.uniqueBase) {
     filters.searchExact = {
       name: item.info.name,
@@ -373,6 +381,7 @@ export function createFilters (
       item.category !== ItemCategory.HeistBlueprint &&
       item.category !== ItemCategory.HeistContract &&
       item.category !== ItemCategory.Chart &&
+      item.category !== ItemCategory.Viscera && // FORK PATCH: Viscera
       item.category !== ItemCategory.MemoryLine &&
       item.category !== ItemCategory.SanctumRelic &&
       item.category !== ItemCategory.Charm &&
@@ -522,6 +531,12 @@ function createGemFilters (
   }
 
   return filters
+}
+
+// FORK PATCH: Viscera — remove when upstream supports Viscera
+function visceraTierPrefix (item: ParsedItem, en = false) {
+  const prefixes = en ? { lesser: 'Lesser ', greater: 'Greater ' } : { lesser: _$.VISCERA_LESSER, greater: _$.VISCERA_GREATER }
+  return item.visceraTier === 'lesser' || item.visceraTier === 'greater' ? prefixes[item.visceraTier] : ''
 }
 
 function t (opts: CreateOptions, info: BaseType) {

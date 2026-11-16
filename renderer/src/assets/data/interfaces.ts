@@ -184,6 +184,8 @@ export interface TranslationDict {
   METAMORPH_HEART: RegExp
   METAMORPH_LIVER: RegExp
   CANNOT_USE_ITEM: string
+  VISCERA_LESSER: string // FORK PATCH: Viscera
+  VISCERA_GREATER: string // FORK PATCH: Viscera
   QUALITY_ANOMALOUS: RegExp
   QUALITY_DIVERGENT: RegExp
   QUALITY_PHANTASMAL: RegExp

@@ -196,6 +196,8 @@ function findInDatabase (item: ParserState) {
     info = ITEM_BY_TRANSLATED('UNIQUE', item.name)
   } else {
     info = ITEM_BY_TRANSLATED('ITEM', item.baseType ?? item.name)
+    // FORK PATCH: Viscera — tier is a name prefix, so strip it for the lookup; non-Viscera hits fall through
+    info = findViscera(item) ?? info
   }
   if (!info?.length) {
     return err('item.unknown')
@@ -219,6 +221,16 @@ function findInDatabase (item: ParserState) {
         item.info.unique.base)![0].craftable!.category
     }
   }
+}
+
+// FORK PATCH: Viscera — remove when upstream supports Viscera
+function findViscera (item: ParserState) {
+  const tiers = [['lesser', _$.VISCERA_LESSER], ['greater', _$.VISCERA_GREATER]] as const
+  const prefix = tiers.find(([, p]) => item.name.startsWith(p))
+  const info = ITEM_BY_TRANSLATED('ITEM', prefix ? item.name.slice(prefix[1].length) : item.name)
+  if (info?.[0].craftable?.category !== ItemCategory.Viscera) return undefined
+  item.visceraTier = prefix?.[0] ?? 'normal'
+  return info
 }
 
 export function makeIdentifiedUnique (uniqueInfo: BaseType, unidentified: ParsedItem): ParsedItem {
@@ -801,7 +813,8 @@ function parseModifiers (section: string[], item: ParsedItem) {
     item.rarity !== ItemRarity.Normal &&
     item.rarity !== ItemRarity.Magic &&
     item.rarity !== ItemRarity.Rare &&
-    item.rarity !== ItemRarity.Unique
+    item.rarity !== ItemRarity.Unique &&
+    item.category !== ItemCategory.Viscera // FORK PATCH: Viscera — no Rarity line
   ) {
     return 'PARSER_SKIPPED'
   }

@@ -62,6 +62,8 @@ export default {
   METAMORPH_HEART: /^.* 心臟$/,
   METAMORPH_LIVER: /^.* 肝臟$/,
   CANNOT_USE_ITEM: '你無法使用這項裝備，它的數值將被忽略',
+  VISCERA_LESSER: '低階 ', // FORK PATCH: Viscera
+  VISCERA_GREATER: '高階 ', // FORK PATCH: Viscera
   QUALITY_ANOMALOUS: /^異常的 (.*)$/,
   QUALITY_DIVERGENT: /^相異的 (.*)$/,
   QUALITY_PHANTASMAL: /^幻影的 (.*)$/,

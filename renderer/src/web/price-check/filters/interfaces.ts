@@ -12,6 +12,7 @@ interface SearchFilter {
   nameTrade?: string
   baseType?: string
   baseTypeTrade?: string
+  termTrade?: string // FORK PATCH: Viscera — remove when upstream supports Viscera
   discriminatorTrade?: string
   category?: ItemCategory
 }

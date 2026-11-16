@@ -62,6 +62,8 @@ export default {
   METAMORPH_HEART: /^Сердце: .*$/,
   METAMORPH_LIVER: /^Печень: .*$/,
   CANNOT_USE_ITEM: '아이템 착용 불가. 아이템 효과 미적용',
+  VISCERA_LESSER: 'Lesser ', // FORK PATCH: Viscera
+  VISCERA_GREATER: 'Greater ', // FORK PATCH: Viscera
   QUALITY_ANOMALOUS: /^기묘한 (.*)$/,
   QUALITY_DIVERGENT: /^상이한 (.*)$/,
   QUALITY_PHANTASMAL: /^몽환적인 (.*)$/,

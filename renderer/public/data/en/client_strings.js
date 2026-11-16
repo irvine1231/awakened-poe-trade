@@ -62,6 +62,8 @@ export default {
   METAMORPH_HEART: /^.* Heart$/,
   METAMORPH_LIVER: /^.* Liver$/,
   CANNOT_USE_ITEM: 'You cannot use this item. Its stats will be ignored',
+  VISCERA_LESSER: 'Lesser ', // FORK PATCH: Viscera
+  VISCERA_GREATER: 'Greater ', // FORK PATCH: Viscera
   QUALITY_ANOMALOUS: /^Anomalous (.*)$/,
   QUALITY_DIVERGENT: /^Divergent (.*)$/,
   QUALITY_PHANTASMAL: /^Phantasmal (.*)$/,
