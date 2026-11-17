@@ -138,7 +138,8 @@ export function parseClipboard (clipboard: string): Result<ParsedItem, string> {
 }
 
 function itemTextToSections (text: string) {
-  const lines = text.split(/\r?\n/)
+  // FORK PATCH: stale stats — the client puts a zero-width space (U+200B) before gem names in support mods
+  const lines = text.replace(/\u200b/g, '').split(/\r?\n/)
   if (lines[lines.length - 1] === '') {
     lines.pop()
   }
